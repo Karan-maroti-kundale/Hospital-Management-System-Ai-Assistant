@@ -1,6 +1,6 @@
 import axios from "axios";
-import React, { useState } from "react";
-import { toast } from "react-toastify";
+import { useState } from "react";
+import { toast } from "react-hot-toast";
 
 const MessageForm = () => {
   const [firstName, setFirstName] = useState("");
@@ -14,7 +14,7 @@ const MessageForm = () => {
     try {
       await axios
         .post(
-          "http://localhost:5000/api/v1/message/send",
+          "http://localhost:3000/api/v1/message/send",
           { firstName, lastName, email, phone, message },
           {
             withCredentials: true,
@@ -30,7 +30,7 @@ const MessageForm = () => {
           setMessage("");
         });
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || 'Failed to send message. Please try again.');
     }
   };
 
@@ -77,7 +77,31 @@ const MessageForm = () => {
             <button type="submit">Send</button>
           </div>
         </form>
-        <img src="/Vector.png" alt="vector" />
+
+        {/* Hospital Cards Section */}
+        <h2 className="hospital-list-heading">Hospitals in Chhatrapati Sambhaji Nagar</h2>
+        <div className="hospital-info-list">
+          <a href="https://www.carehospitals.com/aurangabad/" target="_blank" rel="noopener noreferrer" className="hospital-info-card">
+            <img src="/hospital1.jpg" alt="Care Hospitals" />
+            <span>Care Hospitals</span>
+          </a>
+          <a href="https://www.medicoverhospitals.in/locations/maharashtra/aurangabad/" target="_blank" rel="noopener noreferrer" className="hospital-info-card">
+            <img src="/hospital2.jpg" alt="Medicover Hospitals" />
+            <span>Medicover Hospitals</span>
+          </a>
+          <a href="https://www.mgmmedicalcollege.org/" target="_blank" rel="noopener noreferrer" className="hospital-info-card">
+            <img src="/hospital3.jpg" alt="MGM Medical College & Hospital" />
+            <span>MGM Medical College & Hospital</span>
+          </a>
+          <a href="https://www.kamalnayanbajajhospital.org/" target="_blank" rel="noopener noreferrer" className="hospital-info-card">
+            <img src="/hospital4.jpg" alt="Kamalnayan Bajaj Hospital" />
+            <span>Kamalnayan Bajaj Hospital</span>
+          </a>
+          <a href="https://www.manikchandhospital.com/" target="_blank" rel="noopener noreferrer" className="hospital-info-card">
+            <img src="/hospital5.jpg" alt="Manikchand Hospital" />
+            <span>Manikchand Hospital</span>
+          </a>
+        </div>
       </div>
     </>
   );

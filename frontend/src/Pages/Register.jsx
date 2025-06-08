@@ -1,6 +1,6 @@
 import axios from "axios";
-import React, { useContext, useState } from "react";
-import { toast } from "react-toastify";
+import { useContext, useState } from "react";
+import { toast } from "react-hot-toast";
 import { Context } from "../main";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
@@ -23,7 +23,7 @@ const Register = () => {
     try {
       await axios
         .post(
-          "http://localhost:5000/api/v1/user/patient/register",
+          "http://localhost:3000/api/v1/user/patientRegister",
           { firstName, lastName, email, phone, nic, dob, gender, password },
           {
             withCredentials: true,

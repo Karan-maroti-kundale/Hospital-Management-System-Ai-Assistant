@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Context } from "../main";
@@ -58,7 +58,7 @@ const AddNewDoctor = () => {
       formData.append("doctorDepartment", doctorDepartment);
       formData.append("docAvatar", docAvatar);
       await axios
-        .post("http://localhost:5000/api/v1/user/doctor/addnew", formData, {
+        .post("http://localhost:3000/api/v1/user/doctor/addnew", formData, {
           withCredentials: true,
           headers: { "Content-Type": "multipart/form-data" },
         })
@@ -93,7 +93,7 @@ const AddNewDoctor = () => {
             <div>
               <img
                 src={
-                  docAvatarPreview ? `${docAvatarPreview}` : "/docHolder.jpg"
+                  docAvatarPreview ? `${docAvatarPreview}` : "/docHolder.png"
                 }
                 alt="Doctor Avatar"
               />
@@ -165,7 +165,7 @@ const AddNewDoctor = () => {
                   );
                 })}
               </select>
-              <button type="submit">Register New Doctor</button>
+              <button type="submit">Add New Doctor</button>
             </div>
           </div>
         </form>

@@ -1,0 +1,31 @@
+{
+  "name": "hospital_managment",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "frontend": "cd frontend && npm run dev",
+    "dashboard": "cd dashboard && npm run dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zeeshu911/MERN-Stack-Hospital-Management-System-Web-Application.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Zeeshu911/MERN-Stack-Hospital-Management-System-Web-Application/issues"
+  },
+  "homepage": "https://github.com/Zeeshu911/MERN-Stack-Hospital-Management-System-Web-Application#readme",
+  "description": "",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "dependencies": {
+    "react-hot-toast": "^2.5.2"
+  }
+}

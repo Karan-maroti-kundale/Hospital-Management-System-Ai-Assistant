@@ -1,11 +1,11 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { Context } from "../main";
 import { Navigate, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
 
 const AddNewAdmin = () => {
-  const { isAuthenticated, setIsAuthenticated } = useContext(Context);
+  const { isAuthenticated, setIsAuthenticated, admin } = useContext(Context);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -23,11 +23,14 @@ const AddNewAdmin = () => {
     try {
       await axios
         .post(
-          "http://localhost:5000/api/v1/user/admin/addnew",
+          "http://localhost:3000/api/v1/user/admin/addnew",
           { firstName, lastName, email, phone, nic, dob, gender, password },
           {
             withCredentials: true,
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${admin.token}`
+            },
           }
         )
         .then((res) => {
@@ -35,7 +38,6 @@ const AddNewAdmin = () => {
           setIsAuthenticated(true);
           navigateTo("/");
           setFirstName("");
-          setLastName("");
           setEmail("");
           setPhone("");
           setNic("");
@@ -55,7 +57,7 @@ const AddNewAdmin = () => {
   return (
     <section className="page">
       <section className="container form-component add-admin-form">
-      <img src="/logo.png" alt="logo" className="logo"/>
+        <img src="/logo.png" alt="logo" className="logo" />
         <h1 className="form-title">ADD NEW ADMIN</h1>
         <form onSubmit={handleAddNewAdmin}>
           <div>

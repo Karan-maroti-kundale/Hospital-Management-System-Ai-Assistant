@@ -1,21 +1,54 @@
-export const generateToken = (user, message, statusCode, res) => {
-  const token = user.generateJsonWebToken();
-  // Determine the cookie name based on the user's role
-  const cookieName = user.role === 'Admin' ? 'adminToken' : 'patientToken';
+// backend/utils/jwtToken.js
+import jwt from 'jsonwebtoken';
 
-  res
-    .status(statusCode)
-    .cookie(cookieName, token, {
-      expires: new Date(
-        Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-      ),
-      httpOnly: true,
-    })
-    .json({
-      success: true,
-      message,
-      user,
-      token,
-    });
+// Generate JWT token
+export const generateToken = (user) => {
+  const token = jwt.sign(
+    {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRE || '15d',
+    }
+  );
+  return token;
 };
 
+// Verify JWT token
+export const verifyToken = (token) => {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return decoded;
+  } catch (error) {
+    throw new Error('Invalid or expired token');
+  }
+};
+
+// Generate password reset token
+export const generatePasswordResetToken = () => {
+  const resetToken = crypto.randomBytes(20).toString('hex');
+  
+  const hashedResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+  
+  return {
+    resetToken,
+    hashedResetToken
+  };
+};
+
+// Verify password reset token
+export const verifyPasswordResetToken = (token, hashedToken) => {
+  const resetToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+    
+  return resetToken === hashedToken;
+};

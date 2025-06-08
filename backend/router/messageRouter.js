@@ -1,12 +1,18 @@
-import express from "express";
-import {
+// backend/router/messageRouter.js
+import express from 'express';
+import { 
   getAllMessages,
   sendMessage,
-} from "../controller/messageController.js";
-import { isAdminAuthenticated } from "../middlewares/auth.js";
+  deleteMessage,
+  updateMessage
+} from '../controller/messageController.js';
+
 const router = express.Router();
 
-router.post("/send", sendMessage);
-router.get("/getall", isAdminAuthenticated, getAllMessages);
+// Message routes
+router.post('/send', sendMessage);
+router.get('/getall', getAllMessages);
+router.delete('/message/:id', deleteMessage);
+router.put('/message/:id', updateMessage);
 
 export default router;

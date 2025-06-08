@@ -1,67 +1,71 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GiHamburgerMenu } from "react-icons/gi";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { Context } from "../main";
 
 const Navbar = () => {
   const [show, setShow] = useState(false);
   const { isAuthenticated, setIsAuthenticated } = useContext(Context);
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await axios
-      .get("http://localhost:5000/api/v1/user/patient/logout", {
+    try {
+      const res = await axios.get("http://localhost:3000/api/v1/user/patient/logout", {
         withCredentials: true,
-      })
-      .then((res) => {
-        toast.success(res.data.message);
-        setIsAuthenticated(false);
-      })
-      .catch((err) => {
-        toast.error(err.response.data.message);
       });
+      toast.success(res.data.message);
+      setIsAuthenticated(false);
+      navigate("/login");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Logout failed");
+    }
   };
 
-  const navigateTo = useNavigate();
-
   const goToLogin = () => {
-    navigateTo("/login");
+    navigate("/login");
   };
 
   return (
-    <>
-      <nav className={"container"}>
-        <div className="logo">
-          <img src="/logo.png" alt="logo" className="logo-img" />
+    <nav className="container navbar-custom">
+      <Link to="/" className="logo d-flex align-items-center">
+        <img src="/logo.png" alt="Hospital Logo" className="logo-img" />
+      </Link>
+
+      <div className={show ? "navLinks showmenu" : "navLinks"}>
+        <div className="links">
+          <Link to="/" onClick={() => setShow(false)}>
+            Home
+          </Link>
+          <Link to="/appointment" onClick={() => setShow(false)}>
+            Appointment
+          </Link>
+          <Link to="/about" onClick={() => setShow(false)}>
+            About Us
+          </Link>
         </div>
-        <div className={show ? "navLinks showmenu" : "navLinks"}>
-          <div className="links">
-            <Link to={"/"} onClick={() => setShow(!show)}>
-              Home
-            </Link>
-            <Link to={"/appointment"} onClick={() => setShow(!show)}>
-              Appointment
-            </Link>
-            <Link to={"/about"} onClick={() => setShow(!show)}>
-              About Us
-            </Link>
-          </div>
-          {isAuthenticated ? (
-            <button className="logoutBtn btn" onClick={handleLogout}>
-              LOGOUT
-            </button>
-          ) : (
-            <button className="loginBtn btn" onClick={goToLogin}>
-              LOGIN
-            </button>
-          )}
-        </div>
-        <div className="hamburger" onClick={() => setShow(!show)}>
-          <GiHamburgerMenu />
-        </div>
-      </nav>
-    </>
+
+        {isAuthenticated ? (
+          <button className="logoutBtn btn" onClick={handleLogout}>
+            LOGOUT
+          </button>
+        ) : (
+          <button className="loginBtn btn" onClick={goToLogin}>
+            LOGIN
+          </button>
+        )}
+      </div>
+
+      <div
+        className="hamburger"
+        onClick={() => setShow((prev) => !prev)}
+        aria-label="Toggle navigation menu"
+        role="button"
+      >
+        <GiHamburgerMenu />
+      </div>
+    </nav>
   );
 };
 

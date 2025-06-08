@@ -1,56 +1,38 @@
-import React, { useContext, useEffect } from "react";
-import "./App.css";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from "./Pages/Home";
-import Appointment from "./Pages/Appointment";
-import AboutUs from "./Pages/AboutUs";
-import Register from "./Pages/Register";
-import Footer from "./components/Footer";
-import Navbar from "./components/Navbar";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import axios from "axios";
-import { Context } from "./main";
-import Login from "./Pages/Login";
-const App = () => {
-  const { isAuthenticated, setIsAuthenticated, setUser } =
-    useContext(Context);
+import { useContext } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import './app.css';
+import { Context } from './main';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import Appointment from './pages/Appointment';
+import AboutUs from './pages/AboutUs';
+import Register from './pages/Register';
+import Login from './pages/Login';
+import SmartHospitalGuide from './pages/SmartHospitalGuide';
+import AIHealthAssistant from './components/AIHealthAssistant';
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:5000/api/v1/user/patient/me",
-          {
-            withCredentials: true,
-          }
-        );
-        setIsAuthenticated(true);
-        setUser(response.data.user);
-      } catch (error) {
-        setIsAuthenticated(false);
-        setUser({});
-      }
-    };
-    fetchUser();
-  }, [isAuthenticated]);
+function App() {
+  const { isAuthenticated } = useContext(Context);
 
   return (
-    <>
-      <Router>
-        <Navbar />
+    <div className="App">
+      <Header />
+      <div className="main-content">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/smart-hospital-guide" element={<SmartHospitalGuide />} />
           <Route path="/appointment" element={<Appointment />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
         </Routes>
-        <Footer />
-        <ToastContainer position="top-center" />
-      </Router>
-    </>
+      </div>
+      <AIHealthAssistant />
+      <Footer />
+    </div>
   );
-};
+}
 
 export default App;
+
