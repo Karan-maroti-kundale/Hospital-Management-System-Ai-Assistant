@@ -25,10 +25,9 @@ const Login = () => {
         try {
             setLoading(true);
             const { data } = await axios.post(
-                "http://localhost:3000/api/v1/user/login",
+                "/user/login",
                 { email, password, role: "Patient" },
                 {
-                    withCredentials: true,
                     headers: { "Content-Type": "application/json" },
                 }
             );

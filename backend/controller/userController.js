@@ -10,6 +10,14 @@ export const register = async (req, res) => {
 
     console.log("Registration attempt:", { email, role }); // Debug log
 
+    // Validate required fields
+    if (!firstName || !lastName || !email || !password || !gender || !phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide all required fields: firstName, lastName, email, password, gender, phone"
+      });
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -25,8 +33,8 @@ export const register = async (req, res) => {
       firstName,
       lastName,
       email,
-      password, // Password will be hashed by the pre-save hook
-      role,
+      password,
+      role: role || "Patient", // Default to Patient if role not specified
       gender,
       phone
     });
@@ -35,14 +43,26 @@ export const register = async (req, res) => {
 
     // Generate token
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { 
+        id: user._id, 
+        role: user.role,
+        email: user.email 
+      },
       process.env.JWT_SECRET_KEY,
-      { expiresIn: "7d" }
+      { expiresIn: process.env.JWT_EXPIRES || "7d" }
     );
 
     // Remove password from response
     const userWithoutPassword = { ...user.toObject() };
     delete userWithoutPassword.password;
+
+    // Set token in cookie based on role
+    const cookieName = `${user.role.toLowerCase()}Token`;
+    res.cookie(cookieName, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
 
     res.status(201).json({
       success: true,
@@ -54,7 +74,7 @@ export const register = async (req, res) => {
     console.error("Registration error details:", error); // Detailed error log
     res.status(500).json({
       success: false,
-      message: "Failed to register user"
+      message: error.message || "Failed to register user"
     });
   }
 };
@@ -74,7 +94,7 @@ export const login = async (req, res) => {
 
     // Check if user exists
     const user = await User.findOne({ email }).select("+password");
-    console.log("Found user:", user ? "Yes" : "No"); // Debug log
+    console.log("Login attempt:", { email, role }); // Debug log
 
     if (!user) {
       return res.status(401).json({
@@ -107,16 +127,28 @@ export const login = async (req, res) => {
     user.lastLogin = new Date();
     await user.save();
 
-    // Generate token
+    // Generate token with role
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { 
+        id: user._id, 
+        role: user.role,
+        email: user.email 
+      },
       process.env.JWT_SECRET_KEY,
-      { expiresIn: "7d" }
+      { expiresIn: process.env.JWT_EXPIRES || "7d" }
     );
 
     // Remove password from response
     const userWithoutPassword = { ...user.toObject() };
     delete userWithoutPassword.password;
+
+    // Set token in cookie based on role
+    const cookieName = `${user.role.toLowerCase()}Token`;
+    res.cookie(cookieName, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
 
     res.status(200).json({
       success: true,
@@ -135,6 +167,12 @@ export const login = async (req, res) => {
 
 // Logout user
 export const logout = (req, res) => {
+  // Clear all role-specific cookies
+  const cookieNames = ["token", "adminToken", "doctorToken", "patientToken"];
+  cookieNames.forEach(name => {
+    res.clearCookie(name);
+  });
+
   res.status(200).json({
     success: true,
     message: "Logged out successfully"
@@ -203,7 +241,7 @@ export const updateProfile = async (req, res) => {
 export const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id).select("+password");
 
     if (!user) {
       return res.status(404).json({
@@ -213,7 +251,7 @@ export const changePassword = async (req, res) => {
     }
 
     // Check current password
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    const isPasswordValid = await user.comparePassword(currentPassword);
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -221,12 +259,8 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Hash new password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-
     // Update password
-    user.password = hashedPassword;
+    user.password = newPassword;
     await user.save();
 
     res.status(200).json({

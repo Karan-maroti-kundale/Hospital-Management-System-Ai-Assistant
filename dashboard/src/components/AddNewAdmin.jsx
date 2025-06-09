@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 
 const AddNewAdmin = () => {
-  const { isAuthenticated, setIsAuthenticated, admin } = useContext(Context);
+  const { isAuthenticated } = useContext(Context);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -21,37 +21,47 @@ const AddNewAdmin = () => {
   const handleAddNewAdmin = async (e) => {
     e.preventDefault();
     try {
-      await axios
-        .post(
-          "http://localhost:3000/api/v1/user/admin/addnew",
-          { firstName, lastName, email, phone, nic, dob, gender, password },
-          {
-            withCredentials: true,
-            headers: { 
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${admin.token}`
-            },
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        toast.error("Please login to access this resource");
+        navigateTo("/login");
+        return;
+      }
+
+      const response = await axios.post(
+        "http://localhost:3000/api/v1/user/admin/addnew",
+        { firstName, lastName, email, phone, nic, dob, gender, password },
+        {
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
           }
-        )
-        .then((res) => {
-          toast.success(res.data.message);
-          setIsAuthenticated(true);
-          navigateTo("/");
-          setFirstName("");
-          setEmail("");
-          setPhone("");
-          setNic("");
-          setDob("");
-          setGender("");
-          setPassword("");
-        });
+        }
+      );
+
+      if (response.data.success) {
+        toast.success(response.data.message);
+        navigateTo("/");
+        // Reset form
+        setFirstName("");
+        setLastName("");
+        setEmail("");
+        setPhone("");
+        setNic("");
+        setDob("");
+        setGender("");
+        setPassword("");
+      }
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Failed to add admin");
+      if (error.response?.status === 401) {
+        navigateTo("/login");
+      }
     }
   };
 
   if (!isAuthenticated) {
-    return <Navigate to={"/login"} />;
+    return <Navigate to="/login" />;
   }
 
   return (

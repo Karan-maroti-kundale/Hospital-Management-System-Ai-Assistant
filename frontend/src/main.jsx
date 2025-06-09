@@ -7,6 +7,37 @@ import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import axios from "axios";
 
+// Configure axios defaults
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
+axios.defaults.withCredentials = true;
+
+// Add request interceptor to add auth token
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor to handle token expiration
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Create and export the Context
 export const Context = createContext({ isAuthenticated: false });
 
@@ -24,12 +55,7 @@ const AppWrapper = () => {
         
         if (token && userData) {
           // Verify token with backend
-          const response = await axios.get("http://localhost:3000/api/v1/user/me", {
-            withCredentials: true,
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
+          const response = await axios.get("/user/me");
           
           if (response.data.success) {
             setIsAuthenticated(true);
